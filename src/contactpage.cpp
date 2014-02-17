@@ -80,10 +80,23 @@ void ContactPage::populateContactFields()
     bb::pim::contacts::ContactService contactService;
     const bb::pim::contacts::Contact contact = contactService.contactDetails(contactId_);
 
+    QString displayName = contact.displayName();
+    if (contact.phoneNumbers().size() > 0) {
+    	if (contact.phoneNumbers().at(0).value() == displayName) {
+    		// Phone Number is Display Name
+    		foreach(const bb::pim::contacts::ContactAttribute &attribute, contact.attributes()) {
+    			if (attribute.subKind() == bb::pim::contacts::AttributeSubKind::NameNickname && !attribute.value().isEmpty()) {
+    				displayName = attribute.value();
+    				break;
+    			}
+    		}
+    	}
+    }
+
     if(!contact.smallPhotoFilepath().isEmpty()) {
         page_->setProperty("photoImageSource", QLatin1String("file://") + contact.smallPhotoFilepath());
     }
-    page_->setProperty("displayName", contact.displayName());
+    page_->setProperty("displayName", displayName);
     page_->setProperty("displayCompanyName", contact.displayCompanyName());
 
     populateContactProperties(contact);
